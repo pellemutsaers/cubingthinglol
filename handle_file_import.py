@@ -6,6 +6,7 @@ def get_sessions(session_number) -> list:
     with open(f".\cstimerdata\{filename[0]}") as txtfile:
         lines = str(txtfile.readlines()).split("properties")[0].split(":")
         session = lines[session_number]
+        session = session[:-11]
         session_handled = string_list_conversion(session)
         return get_times(session_handled)
 
@@ -23,6 +24,8 @@ def get_times(session: list):
         except:
             pass
     return timeslist
+
+# -------------------------------------------------------------------------
 
 def unnested_split(string: str):
     start = 0
@@ -47,5 +50,3 @@ def string_list_conversion(string: str, split_string: str = ",") -> list:
     return string
 
 # I definitely wrote this ^
-
-get_sessions(1)
