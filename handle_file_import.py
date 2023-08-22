@@ -1,27 +1,23 @@
 #Paste the export txt file from cstimer in the cstimerdata folder, the script will automatically take the top file in the folder.
 import os
 
-def get_sessions() -> list: 
+def get_sessions(session_number) -> list: 
     filename = os.listdir(".\cstimerdata")
     with open(f".\cstimerdata\{filename[0]}") as txtfile:
         lines = str(txtfile.readlines()).split("properties")[0].split(":")
-        amount_of_sessions = len(lines) - 1
-        sessions = []
-        for i in range(amount_of_sessions):
-            session = lines[i + 1] # session is of type string
-            session = string_list_conversion(session)
-            sessions.append(get_times(session))
-        return sessions
+        session = lines[session_number]
+        session_handled = string_list_conversion(session)
+        return get_times(session_handled)
 
-def get_times(session: list[str]):
+def get_times(session: list):
     timeslist = []
     for solve in session:
         try:
             time = int(solve[0][1])
-            if solve[0][0] == -1:
-                timeslist.append("DNF")
-            elif solve[0][0] != 0:
-                timeslist.append(round(time + solve[0][0] / 1000, 2))
+            if solve[0][0] == "-1":
+                timeslist.append(float("nan"))
+            elif solve[0][0] != "0":
+                timeslist.append(round((time + solve[0][0]) / 1000, 2))
             else:
                 timeslist.append(round(time / 1000, 2))
         except:
@@ -52,4 +48,4 @@ def string_list_conversion(string: str, split_string: str = ",") -> list:
 
 # I definitely wrote this ^
 
-print(get_sessions())
+get_sessions(1)

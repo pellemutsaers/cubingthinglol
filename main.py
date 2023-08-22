@@ -8,7 +8,7 @@ import handle_file_import
 
 n = 5
 time_list = 0
-index_list = 0
+index_list = []
 
 # session_number = 17
 # with open(f"CStimer_sessions/session{session_number}.csv") as csv_file:
@@ -33,6 +33,7 @@ index_list = 0
 #             else:
 #                 time_list.append(float(row[1]))
 #             index_list.append(index)
+#    calculate_session(time_list)
 
 class Averages():
     def __init__(self, x, color):
@@ -47,7 +48,10 @@ def calculate_session(session):
     global time_list
     global index_list
 
-    time_list = handle_file_import.get_sessions()[session]
+    time_list = []
+    index_list = []
+
+    time_list = handle_file_import.get_sessions(session)
     for i in range(len(time_list)):
         index_list.append(i)
 
@@ -108,7 +112,7 @@ def calculate_session(session):
     plt.show()
 
     time_list.sort()
-    print(time_list[0:10])
+    print(f"Ten best solves from session: {time_list[0:10]}")
 
 def process_regression(slowest_time, fastest_time, regression_list):
     x_margin = 0.005 * len(time_list)
