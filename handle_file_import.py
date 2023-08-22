@@ -1,19 +1,16 @@
 #Paste the export txt file from cstimer in the cstimerdata folder, the script will automatically take the top file in the folder.
 import os
 
+print(os.name)
+
 def get_sessions(session_number) -> list: 
-    try:
-        os.makedir("./con")
-        operatingsys = "dumb os"
-    except:
-        operatingsys = "windows"
-    
-    if operatingsys == "windows":
-        filename = os.listdir(".\cstimerdata")
-        filename = f".\cstimerdata\{filename[0]}"
-    else: 
+    if os.name == "posix":
         filename = os.listdir("./cstimerdata")
         filename = f"./cstimerdata/{filename[0]}"
+    else:
+        filename = os.listdir(".\cstimerdata")
+        filename = f".\cstimerdata\{filename[0]}"
+
 
     with open(filename) as txtfile:
         lines = str(txtfile.readlines()).split("properties")[0].split(":")
