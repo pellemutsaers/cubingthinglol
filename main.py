@@ -5,7 +5,7 @@ import math
 import average_calculator
 import handle_file_import
 
-n = 1 # polynomial order
+n = 5 # polynomial order
 time_list = 0
 index_list = []
 
@@ -50,7 +50,7 @@ def calculate_session(session):
     time_list = []
     index_list = []
 
-    time_list = handle_file_import.get_sessions(session)
+    time_list, name = handle_file_import.get_sessions(session)
     for i in range(len(time_list)):
         index_list.append(i)
 
@@ -67,7 +67,12 @@ def calculate_session(session):
         time_list_copy.pop(i)
         index_list_copy.pop(i)
 
-    regression_values = np.polyfit(index_list_copy, time_list_copy, n)
+    try:
+        regression_values = np.polyfit(index_list_copy, time_list_copy, n)
+    except:
+        print("session is empty, try another one")
+        return 0
+
     px = np.poly1d(regression_values)
     regression_list = []
     for i in index_list:
@@ -96,6 +101,7 @@ def calculate_session(session):
     plt.ylim(math.floor(.9*fastest_time), math.ceil(1.1*slowest_time))
     plt.xlim(0, len(time_list) * 1.02)
     plt.grid("minor", color="grey")
+    plt.title(name)
 
     ax.set_facecolor("#dbd8d7")
     ax.spines['left'].set_color('#000000')
