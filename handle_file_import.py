@@ -1,8 +1,6 @@
 #Paste the export txt file from cstimer in the cstimerdata folder, the script will automatically take the top file in the folder.
 import os
 
-print(os.name)
-
 def get_sessions(session_number) -> list: 
     if os.name == "posix":
         filename = os.listdir("./cstimerdata")
@@ -13,9 +11,9 @@ def get_sessions(session_number) -> list:
 
 
     with open(filename) as txtfile:
-        lines = str(txtfile.readlines()).split("properties")[0].split(":")
+        lines = str(txtfile.readlines()).split("properties")[0].split('":')
         session = lines[session_number]
-        session = session[:-11]
+        session: str = session.split("]],")[0] + "]]"
         session_handled = string_list_conversion(session)
         return get_times(session_handled)
 

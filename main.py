@@ -5,7 +5,7 @@ import math
 import average_calculator
 import handle_file_import
 
-n = 5 # polynomial order
+n = 1 # polynomial order
 time_list = 0
 index_list = []
 
@@ -85,8 +85,8 @@ def calculate_session(session):
 
     process_singles(slowest_time, fastest_time, thickness_factor)
 
-    averages_to_plot = [5, 12, 50, 100, 1000]
-    colors = iter(["#f67280", "#c06c84", "#6c5b7b", "#355c7d", "#ccccff"])
+    averages_to_plot = [5, 12, 50, 100]
+    colors = iter(["#f67280", "#c06c84", "#6c5b7b", "#355c7d"])
     for i in averages_to_plot:
         thickness_factor += 0.2
         Averages(i, next(colors)).plot(thickness_factor)
