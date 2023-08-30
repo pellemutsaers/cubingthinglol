@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt
-# import csv
 import numpy as np
 import math
 import average_calculator
@@ -8,31 +7,6 @@ import handle_file_import
 n = 5 # polynomial order
 time_list = 0
 index_list = []
-
-# session_number = 17
-# with open(f"CStimer_sessions/session{session_number}.csv") as csv_file:
-#     csv_reader = csv.reader(csv_file, delimiter=";")
-#     csv_reader.__next__()
-#     for index, row in enumerate(csv_reader):
-#         if "DNF" in row[1]:
-#             time_list.append(float("nan"))
-#             index_list.append(index)
-#         else:
-#             if "+" in row[1] and ":" in row[1]:
-#                 minute_split = row[1].split(":")
-#                 minute_split[1].replace(":", "")
-#                 time_list.append(float(minute_split[0])*60 + float(minute_split[1][:-1]) + 2)
-#             elif ":" in row[1]:
-#                 minute_split = row[1].split(":")
-#                 minute_split[1].replace(":", "")
-#                 time_list.append(float(minute_split[0])*60 + float(minute_split[1]))
-#             elif "+" in row[1]:
-#                 time_list.append(float(row[1][:-1]) + 2)
-
-#             else:
-#                 time_list.append(float(row[1]))
-#             index_list.append(index)
-#    calculate_session(time_list)
 
 class Averages():
     def __init__(self, x, color):
@@ -50,7 +24,7 @@ def calculate_session(session):
     time_list = []
     index_list = []
 
-    time_list, name = handle_file_import.get_sessions(session)
+    time_list, name = file.get_sessions(session)
     for i in range(len(time_list)):
         index_list.append(i)
 
@@ -146,6 +120,8 @@ def process_singles(slowest_time, fastest_time, thickness_factor):
     plt.stem(fastest_time_index, fastest_time, markerfmt="k.", linefmt="k-.", orientation="vertical", bottom=math.floor(.9*fastest_time))
     plt.text(0 + x_margin, fastest_time - y_margin, f"{fastest_time}", color="k", horizontalalignment="left", verticalalignment="top")
     plt.text(fastest_time_index + x_margin, math.floor(.9*fastest_time) + y_margin, f"{fastest_time_index}", horizontalalignment="left", verticalalignment="bottom", color="k", rotation = "vertical")
+
+file = handle_file_import.CSTimerDataHandler()
 
 running = True
 while running:

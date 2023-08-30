@@ -1,46 +1,70 @@
 #Paste the export txt file from cstimer in the cstimerdata folder, the script will automatically take the top file in the folder.
 import os
 
-def get_sessions(session_number) -> list: 
-    if os.name == "posix":
-        filename = os.listdir("./cstimerdata")
-        filename = f"./cstimerdata/{filename[0]}"
-    else:
-        filename = os.listdir(".\cstimerdata")
-        filename = f".\cstimerdata\{filename[0]}"
+class CSTimerDataHandler:
+    def __init__(self):
+        self.lines = None
+        self.filename = self.get_filename()
+        with open(self.filename) as txtfile:
+            self.lines = str(txtfile.readlines())
+            session_names = self.get_session_name(self.lines)
+            for i, name in enumerate(session_names):
+                print(f"{i + 1}: {name}")
 
-    with open(filename) as txtfile:
-        lines = str(txtfile.readlines())
-        sessions = lines.split("properties")[0].split('":')
+    def get_filename(self):
+        for index, i in enumerate(os.listdir("./cstimerdata")):
+            print(f"{index + 1}: {i}")
+
+        cstimer_file = int(input("Enter index of the file you want to use: "))
+
+        if os.name == "posix":
+            filenames = os.listdir("./cstimerdata")
+            self.filename = f"./cstimerdata/{filenames[cstimer_file - 1]}"
+        else:
+            filenames = os.listdir(".\cstimerdata")
+            self.filename = f".\cstimerdata\{filenames[cstimer_file - 1]}"
+        return self.filename
+
+    def get_sessions(self, session_number):
+        sessions = self.lines.split("properties")[0].split('":')
         session = sessions[session_number]
-        session: str = session.split("]],")[0] + "]]"
+        session = session.split("]],")[0] + "]]"
         session_handled = string_list_conversion(session)
-        session_name = get_session_name(session_number, lines)
-        return get_times(session_handled), session_name
+        session_name = self.get_session_name(self.lines, session_number)
+        return self.get_times(session_handled), session_name
 
-def get_times(session: list):
-    timeslist = []
-    for solve in session:
-        try:
-            time = int(solve[0][1])
-            if solve[0][0] == "-1":
-                timeslist.append(float("nan"))
-            elif solve[0][0] != "0":
-                timeslist.append(round((time + solve[0][0]) / 1000, 2))
-            else:
-                timeslist.append(round(time / 1000, 2))
-        except:
-            pass
-    return timeslist
+    def get_times(self, session):
+        timeslist = []
+        for solve in session:
+            try:
+                time = int(solve[0][1])
+                if solve[0][0] == "-1":
+                    timeslist.append(float("nan"))
+                elif solve[0][0] != "0":
+                    timeslist.append(round((time + solve[0][0]) / 1000, 2))
+                else:
+                    timeslist.append(round(time / 1000, 2))
+            except:
+                pass
+        return timeslist
 
-def get_session_name(session_number, lines: str):
-    start = lines.index('":"')
-    end = lines.rindex('","color"')
-    containing_names = lines[start + 3:end]
-    dictionary = string_list_conversion(containing_names)
-    session_info = dictionary[str(session_number)]
-    session_name = session_info["name"]
-    return session_name
+    def get_session_name(self, lines, session_number=0):
+        start = lines.index('":"')
+        end = lines.rindex('","color"')
+        containing_names = lines[start + 3:end]
+        dictionary = string_list_conversion(containing_names)
+
+        if session_number:
+            session_info = dictionary[str(session_number)]
+            session_name = session_info["name"]
+            return session_name
+
+        else:
+            names = []
+            for i in range(len(dictionary)):
+                session_info = dictionary[str(i + 1)]
+                names.append(session_info["name"])
+            return names
 
 # -------------------------------------------------------------------------
 
@@ -97,3 +121,5 @@ def string_list_conversion(string: str) -> list | dict:
     if "[" in string:
         return [string_list_conversion(i) for i in unnested_split_list(string[1:-1])]
     return string
+
+# Credit to Gijs Peletier ^
