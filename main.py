@@ -129,7 +129,7 @@ app = Flask(__name__)
 def home():
     file = handle_file_import.CSTimerDataHandler()
 
-    session_input = "1" #input("Type in the number of the session you want to see. For example: 1. To close type enter: ")
+    session_input = "1"
     if session_input.isdigit():
         calculate_session(int(session_input), file)
     else:
