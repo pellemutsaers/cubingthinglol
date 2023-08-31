@@ -1,6 +1,6 @@
 #Paste the export txt file from cstimer in the cstimerdata folder, the script will automatically take the top file in the folder.
 import os
-from typing import Tuple
+from typing import Tuple, Union
 
 class CSTimerDataHandler:
     def __init__(self):
@@ -116,7 +116,7 @@ def unnested_split_list(string: str) -> list:
         returns.append(string[start:end+1])
     return returns
 
-def string_list_conversion(string: str) -> list | dict:
+def string_list_conversion(string: str) -> Union[list, dict]:
     if "{" == string[0]:
         return {k : string_list_conversion(v) for k, v in unnested_split_dict(string[1:-1]).items()}
     if "[" in string:
