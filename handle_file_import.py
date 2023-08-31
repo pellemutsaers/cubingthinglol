@@ -1,5 +1,6 @@
 #Paste the export txt file from cstimer in the cstimerdata folder, the script will automatically take the top file in the folder.
 import os
+from typing import Tuple
 
 class CSTimerDataHandler:
     def __init__(self):
@@ -68,7 +69,7 @@ class CSTimerDataHandler:
 
 # -------------------------------------------------------------------------
 
-def parse_dict_element(string: str) -> tuple[object, object]:
+def parse_dict_element(string: str) -> Tuple[object, object]:
     new_string = string.replace(chr(92), "").replace('"', '')
     return new_string[:new_string.index(":")], new_string[new_string.index(":")+ 1:]
 
