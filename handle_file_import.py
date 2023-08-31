@@ -15,7 +15,7 @@ class CSTimerDataHandler:
         for index, i in enumerate(os.listdir("./cstimerdata")):
             print(f"{index + 1}: {i}")
 
-        cstimer_file = int(input("Enter index of the file you want to use: "))
+        cstimer_file = 1 #int(input("Enter index of the file you want to use: "))
 
         if os.name == "posix":
             filenames = os.listdir("./cstimerdata")
