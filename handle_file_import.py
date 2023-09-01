@@ -1,10 +1,11 @@
 #Paste the export txt file from cstimer in the cstimerdata folder, the script will automatically take the top file in the folder.
 import os
+from typing import Tuple, Union
 
 class CSTimerDataHandler:
-    def __init__(self):
+    def __init__(self, csfile):
         self.lines = None
-        self.filename = self.get_filename()
+        self.filename = f"static/{csfile}"
         with open(self.filename) as txtfile:
             self.lines = str(txtfile.readlines())
             session_names = self.get_session_name(self.lines)
@@ -68,7 +69,7 @@ class CSTimerDataHandler:
 
 # -------------------------------------------------------------------------
 
-def parse_dict_element(string: str) -> tuple[object, object]:
+def parse_dict_element(string: str) -> Tuple[object, object]:
     new_string = string.replace(chr(92), "").replace('"', '')
     return new_string[:new_string.index(":")], new_string[new_string.index(":")+ 1:]
 
@@ -115,7 +116,7 @@ def unnested_split_list(string: str) -> list:
         returns.append(string[start:end+1])
     return returns
 
-def string_list_conversion(string: str) -> list | dict:
+def string_list_conversion(string: str) -> Union[list, dict]:
     if "{" == string[0]:
         return {k : string_list_conversion(v) for k, v in unnested_split_dict(string[1:-1]).items()}
     if "[" in string:

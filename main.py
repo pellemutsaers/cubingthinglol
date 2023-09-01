@@ -3,11 +3,16 @@ import numpy as np
 import math
 import average_calculator
 import handle_file_import
-from flask import Flask, render_template
+from flask import Flask, render_template, flash, request, redirect, url_for, make_response
+from werkzeug.utils import secure_filename
+import os
 
 n = 5 # polynomial order
 time_list = 0
 index_list = []
+
+UPLOAD_FOLDER = 'static'
+ALLOWED_EXTENSIONS = {'txt'}
 
 app = Flask(__name__)
 
@@ -125,16 +130,65 @@ def process_singles(ax, slowest_time, fastest_time, thickness_factor):
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    file = handle_file_import.CSTimerDataHandler()
+# @app.route('/')
+# def home():
+#     file = handle_file_import.CSTimerDataHandler()
 
-    session_input = "1"
-    if session_input.isdigit():
-        calculate_session(int(session_input), file)
+#     session_input = "1"
+#     if session_input.isdigit():
+#         calculate_session(int(session_input), file)
+#     else:
+#         return "wtf how ew"
+#     return render_template('gay.html')
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    if request.method == 'GET':
+        if request.cookies.get('sessionfile') is None:
+            return redirect('/upload', 302)
+        
+        csfile = request.cookies.get('sessionfile')
+
+        file = handle_file_import.CSTimerDataHandler(csfile) #how feed csfile -> ur handle file?
+
+        session_input = "1"
+        if session_input.isdigit():
+            calculate_session(int(session_input), file)
+        else:
+            return "wtf how ew"
+        return render_template('gay.html')
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('Error please submit file')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file found')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+            resp = make_response(redirect("/", 302))
+            resp.set_cookie("sessionfile", file.filename)
+            return resp
     else:
-        return "wtf how ew"
-    return render_template('gay.html')
+        if request.cookies.get('sessionfile') != None:
+            return redirect("/", 302)
+        return render_template('upload.html')
+
+@app.route('/eatmycookies')
+def eatmycookies():
+    resp = make_response(redirect('/upload', 302))
+    os.remove(f"static/{resp.cookies.get('sessionfile')}")
+    resp.delete_cookie('sessionfile')
+    return resp
 
 if __name__ == "__main__":
   app.run(host='0.0.0.0', port=8080, debug=False)
