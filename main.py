@@ -185,6 +185,8 @@ def upload():
 
 @app.route('/eatmycookies')
 def eatmycookies():
+    if os.path.exists(f"static/{request.cookies.get('sessionfile')}"):
+        os.remove(f"static/{request.cookies.get('sessionfile')}")
     resp = make_response(redirect('/upload', 302))
     resp.delete_cookie('sessionfile')
     return resp
