@@ -141,15 +141,15 @@ app = Flask(__name__)
 #         return "wtf how ew"
 #     return render_template('gay.html')
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'GET':
-        if request.cookeies.get('sessionfile') == None:
+        if request.cookies.get('sessionfile') is None:
             return redirect('/upload', 302)
         
         csfile = request.cookies.get('sessionfile')
 
-        file = handle_file_import.CSTimerDataHandler() #how feed csfile -> ur handle file?
+        file = handle_file_import.CSTimerDataHandler(csfile) #how feed csfile -> ur handle file?
 
         session_input = "1"
         if session_input.isdigit():
@@ -182,6 +182,13 @@ def upload():
         if request.cookies.get('sessionfile') != None:
             return redirect("/", 302)
         return render_template('upload.html')
+
+@app.route('/eatmycookies')
+def eatmycookies():
+    resp = make_response(redirect('/upload', 302))
+    os.remove(f"static/{resp.cookies.get('sessionfile')}")
+    resp.delete_cookie('sessionfile')
+    return resp
 
 if __name__ == "__main__":
   app.run(host='0.0.0.0', port=8080, debug=False)
