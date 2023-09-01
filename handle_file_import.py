@@ -3,9 +3,9 @@ import os
 from typing import Tuple, Union
 
 class CSTimerDataHandler:
-    def __init__(self):
+    def __init__(self, csfile):
         self.lines = None
-        self.filename = self.get_filename()
+        self.filename = f"static/{csfile}"
         with open(self.filename) as txtfile:
             self.lines = str(txtfile.readlines())
             session_names = self.get_session_name(self.lines)
