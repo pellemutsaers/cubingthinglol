@@ -2,3 +2,5 @@ flask
 matplotlib
 numpy
 werkzeug
+flask_wtf
+wtforms

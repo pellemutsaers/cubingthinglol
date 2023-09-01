@@ -6,6 +6,8 @@ import handle_file_import
 from flask import Flask, render_template, flash, request, redirect, url_for, make_response
 from werkzeug.utils import secure_filename
 import os
+from flask_wtf import FlaskForm
+from wtforms import SelectField
 
 n = 5 # polynomial order
 time_list = 0
@@ -130,16 +132,13 @@ def process_singles(ax, slowest_time, fastest_time, thickness_factor):
 
 app = Flask(__name__)
 
-# @app.route('/')
-# def home():
-#     file = handle_file_import.CSTimerDataHandler()
+class SubjectSelectorForm(FlaskForm):
+  selector = SelectField("Subject")
 
-#     session_input = "1"
-#     if session_input.isdigit():
-#         calculate_session(int(session_input), file)
-#     else:
-#         return "wtf how ew"
-#     return render_template('gay.html')
+  def __init__(self, options=None, **kwargs):
+      super(SubjectSelectorForm, self).__init__(**kwargs)
+      if options:
+          self.selector.choices = options
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -156,6 +155,8 @@ def home():
             calculate_session(int(session_input), file)
         else:
             return "wtf how ew"
+        return render_template('gay.html')
+    elif request.method == 'POST':
         return render_template('gay.html')
 
 def allowed_file(filename):
