@@ -153,8 +153,9 @@ def home():
     if not os.path.exists(f"static/{csfile}"):
         return redirect('/eatmycookies', 302)
 
+    print("before")
     file = handle_file_import.CSTimerDataHandler(csfile)
-
+    print("after")
     sessions = file.session_names
     form = SelectorForm(sessions)
 

@@ -1,4 +1,3 @@
-#Paste the export txt file from cstimer in the cstimerdata folder, the script will automatically take the top file in the folder.
 import os
 from typing import Tuple, Union
 
@@ -9,20 +8,6 @@ class CSTimerDataHandler:
         with open(self.filename) as txtfile:
             self.lines = str(txtfile.readlines())
             self.session_names = self.get_session_name(self.lines)
-
-    def get_filename(self):
-        for index, i in enumerate(os.listdir("./cstimerdata")):
-            print(f"{index + 1}: {i}")
-
-        cstimer_file = 1 #int(input("Enter index of the file you want to use: "))
-
-        if os.name == "posix":
-            filenames = os.listdir("./cstimerdata")
-            self.filename = f"./cstimerdata/{filenames[cstimer_file - 1]}"
-        else:
-            filenames = os.listdir(".\cstimerdata")
-            self.filename = f".\cstimerdata\{filenames[cstimer_file - 1]}"
-        return self.filename
 
     def get_sessions(self, session_number):
         sessions = self.lines.split("properties")[0].split('":')
@@ -49,8 +34,9 @@ class CSTimerDataHandler:
 
     def get_session_name(self, lines, session_number=0):
         start = lines.index('":"')
-        end = lines.rindex('","color"')
-        containing_names = lines[start + 3:end]
+        end = lines.index("]}}")
+        containing_names = lines[start + 3:end+3]
+        print(containing_names)
         dictionary = string_list_conversion(containing_names)
 
         if session_number:
@@ -60,10 +46,32 @@ class CSTimerDataHandler:
 
         else:
             names = []
+            print(len(dictionary))
             for i in range(len(dictionary)):
                 session_info = dictionary[str(i + 1)]
                 names.append(session_info["name"])
             return names
+
+"""
+multi line strings{}[]'hello' "what's up"
+"""
+    # def get_session_name(self, lines, session_number=0):
+    #     start = lines.index('":"')
+    #     end = lines.rindex('","color"')
+    #     containing_names = lines[start + 3:end]
+    #     dictionary = string_list_conversion(containing_names)
+
+    #     if session_number:
+    #         session_info = dictionary[str(session_number)]
+    #         session_name = session_info["name"]
+    #         return session_name
+
+    #     else:
+    #         names = []
+    #         for i in range(len(dictionary)):
+    #             session_info = dictionary[str(i + 1)]
+    #             names.append(session_info["name"])
+    #         return names
 
 # -------------------------------------------------------------------------
 
