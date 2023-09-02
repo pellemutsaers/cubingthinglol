@@ -3,9 +3,12 @@ import numpy as np
 import math
 import average_calculator
 import handle_file_import
-from flask import Flask, render_template, flash, request, redirect, url_for, make_response
+from flask import Flask, render_template, flash, request, redirect, make_response
 from werkzeug.utils import secure_filename
 import os
+from flask_wtf import FlaskForm
+from wtforms import SelectField, SubmitField
+from flask_wtf.csrf import CSRFProtect
 
 n = 5 # polynomial order
 time_list = 0
@@ -15,6 +18,7 @@ UPLOAD_FOLDER = 'static'
 ALLOWED_EXTENSIONS = {'txt'}
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = "HiPelex"
 
 class Averages():
     def __init__(self, x, color):
@@ -113,6 +117,7 @@ def process_regression(ax, slowest_time, fastest_time, regression_list):
     fastest_regression_time_fmt = round(fastest_regression_time, 2)
 
     ax.plot(index_list, regression_list, "--", color="white", linewidth=2, label="Regression line")
+    ax.stem(fastest_regression_time, fastest_regression_time_index, markerfmt="k.", linefmt="k-.", orientation="horizontal") # add this line
     ax.stem(fastest_regression_time_index, fastest_regression_time, markerfmt="k.", linefmt="k-.", orientation="vertical", basefmt=" ", bottom=math.floor(.9*fastest_time))
     ax.text(x_margin, fastest_regression_time - y_margin, f"{fastest_regression_time_fmt}", color="k", horizontalalignment="left", verticalalignment="top")
     ax.text(fastest_regression_time_index + x_margin, math.floor(.9*fastest_time) + y_margin, f"{fastest_regression_time_index}", horizontalalignment="left", verticalalignment="bottom", color="k", rotation="vertical")
@@ -124,39 +129,45 @@ def process_singles(ax, slowest_time, fastest_time, thickness_factor):
     fastest_time_index = np.nanargmin(time_list)
 
     ax.plot(index_list, time_list, linewidth=0.5 * thickness_factor, color="#f8b195", label="Times")
+    ax.stem(fastest_time, fastest_time_index, markerfmt="k.", linefmt="k-.", orientation="horizontal") # and this line
     ax.stem(fastest_time_index, fastest_time, markerfmt="k.", linefmt="k-.", orientation="vertical", basefmt=" ", bottom=math.floor(.9*fastest_time))
     ax.text(0 + x_margin, fastest_time - y_margin, f"{fastest_time}", color="k", horizontalalignment="left", verticalalignment="top")
     ax.text(fastest_time_index + x_margin, math.floor(.9*fastest_time) + y_margin, f"{fastest_time_index}", horizontalalignment="left", verticalalignment="bottom", color="k", rotation="vertical")
 
-app = Flask(__name__)
+class SelectorForm(FlaskForm):
+  submit = SubmitField("Submit")
+  selector = SelectField("Session")
 
-# @app.route('/')
-# def home():
-#     file = handle_file_import.CSTimerDataHandler()
-
-#     session_input = "1"
-#     if session_input.isdigit():
-#         calculate_session(int(session_input), file)
-#     else:
-#         return "wtf how ew"
-#     return render_template('gay.html')
+  def __init__(self, options=None, **kwargs):
+      super(SelectorForm, self).__init__(**kwargs)
+      if options:
+          self.selector.choices = options
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == 'GET':
-        if request.cookies.get('sessionfile') is None:
+    if request.cookies.get('sessionfile') is None:
             return redirect('/upload', 302)
-        
-        csfile = request.cookies.get('sessionfile')
+    
+    csfile = request.cookies.get('sessionfile')
 
-        file = handle_file_import.CSTimerDataHandler(csfile) #how feed csfile -> ur handle file?
+    if not os.path.exists(f"static/{csfile}"):
+        return redirect('/eatmycookies', 302)
+
+    file = handle_file_import.CSTimerDataHandler(csfile)
+
+    sessions = file.session_names
+    form = SelectorForm(sessions)
+
+    if request.method == 'GET':
 
         session_input = "1"
         if session_input.isdigit():
             calculate_session(int(session_input), file)
-        else:
-            return "wtf how ew"
-        return render_template('gay.html')
+        return render_template('gay.html',form=form)
+    elif request.method == 'POST':
+        session_input = sessions.index(form.selector.data)+1
+        calculate_session(int(session_input), file)
+        return render_template('gay.html',form=form)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -185,8 +196,9 @@ def upload():
 
 @app.route('/eatmycookies')
 def eatmycookies():
+    if os.path.exists(f"static/{request.cookies.get('sessionfile')}"):
+        os.remove(f"static/{request.cookies.get('sessionfile')}")
     resp = make_response(redirect('/upload', 302))
-    os.remove(f"static/{resp.cookies.get('sessionfile')}")
     resp.delete_cookie('sessionfile')
     return resp
 
