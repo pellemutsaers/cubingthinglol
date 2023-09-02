@@ -8,9 +8,7 @@ class CSTimerDataHandler:
         self.filename = f"static/{csfile}"
         with open(self.filename) as txtfile:
             self.lines = str(txtfile.readlines())
-            session_names = self.get_session_name(self.lines)
-            for i, name in enumerate(session_names):
-                print(f"{i + 1}: {name}")
+            self.session_names = self.get_session_name(self.lines)
 
     def get_filename(self):
         for index, i in enumerate(os.listdir("./cstimerdata")):
