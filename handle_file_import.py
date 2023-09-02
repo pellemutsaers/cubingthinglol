@@ -10,6 +10,20 @@ class CSTimerDataHandler:
             self.lines = str(txtfile.readlines())
             self.session_names = self.get_session_name(self.lines)
 
+    def get_filename(self):
+        for index, i in enumerate(os.listdir("./cstimerdata")):
+            print(f"{index + 1}: {i}")
+
+        cstimer_file = 1 #int(input("Enter index of the file you want to use: "))
+
+        if os.name == "posix":
+            filenames = os.listdir("./cstimerdata")
+            self.filename = f"./cstimerdata/{filenames[cstimer_file - 1]}"
+        else:
+            filenames = os.listdir(".\cstimerdata")
+            self.filename = f".\cstimerdata\{filenames[cstimer_file - 1]}"
+        return self.filename
+
     def get_sessions(self, session_number):
         sessions = self.lines.split("properties")[0].split('":')
         session = sessions[session_number]
