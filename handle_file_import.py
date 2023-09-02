@@ -8,23 +8,7 @@ class CSTimerDataHandler:
         self.filename = f"static/{csfile}"
         with open(self.filename) as txtfile:
             self.lines = str(txtfile.readlines())
-            session_names = self.get_session_name(self.lines)
-            for i, name in enumerate(session_names):
-                print(f"{i + 1}: {name}")
-
-    def get_filename(self):
-        for index, i in enumerate(os.listdir("./cstimerdata")):
-            print(f"{index + 1}: {i}")
-
-        cstimer_file = 1 #int(input("Enter index of the file you want to use: "))
-
-        if os.name == "posix":
-            filenames = os.listdir("./cstimerdata")
-            self.filename = f"./cstimerdata/{filenames[cstimer_file - 1]}"
-        else:
-            filenames = os.listdir(".\cstimerdata")
-            self.filename = f".\cstimerdata\{filenames[cstimer_file - 1]}"
-        return self.filename
+            self.session_names = self.get_session_name(self.lines)
 
     def get_sessions(self, session_number):
         sessions = self.lines.split("properties")[0].split('":')
@@ -62,9 +46,8 @@ class CSTimerDataHandler:
 
         else:
             names = []
-            for i in range(len(dictionary)):
-                session_info = dictionary[str(i + 1)]
-                names.append(session_info["name"])
+            for i in dictionary:
+                names.append(i["name"])
             return names
 
 # -------------------------------------------------------------------------

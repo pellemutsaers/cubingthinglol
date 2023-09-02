@@ -113,6 +113,7 @@ def process_regression(ax, slowest_time, fastest_time, regression_list):
     fastest_regression_time_fmt = round(fastest_regression_time, 2)
 
     ax.plot(index_list, regression_list, "--", color="white", linewidth=2, label="Regression line")
+    ax.stem(fastest_regression_time, fastest_regression_time_index, markerfmt="k.", linefmt="k-.", orientation="horizontal") # add this line
     ax.stem(fastest_regression_time_index, fastest_regression_time, markerfmt="k.", linefmt="k-.", orientation="vertical", basefmt=" ", bottom=math.floor(.9*fastest_time))
     ax.text(x_margin, fastest_regression_time - y_margin, f"{fastest_regression_time_fmt}", color="k", horizontalalignment="left", verticalalignment="top")
     ax.text(fastest_regression_time_index + x_margin, math.floor(.9*fastest_time) + y_margin, f"{fastest_regression_time_index}", horizontalalignment="left", verticalalignment="bottom", color="k", rotation="vertical")
@@ -124,6 +125,7 @@ def process_singles(ax, slowest_time, fastest_time, thickness_factor):
     fastest_time_index = np.nanargmin(time_list)
 
     ax.plot(index_list, time_list, linewidth=0.5 * thickness_factor, color="#f8b195", label="Times")
+    ax.stem(fastest_time, fastest_time_index, markerfmt="k.", linefmt="k-.", orientation="horizontal") # and this line
     ax.stem(fastest_time_index, fastest_time, markerfmt="k.", linefmt="k-.", orientation="vertical", basefmt=" ", bottom=math.floor(.9*fastest_time))
     ax.text(0 + x_margin, fastest_time - y_margin, f"{fastest_time}", color="k", horizontalalignment="left", verticalalignment="top")
     ax.text(fastest_time_index + x_margin, math.floor(.9*fastest_time) + y_margin, f"{fastest_time_index}", horizontalalignment="left", verticalalignment="bottom", color="k", rotation="vertical")
@@ -150,6 +152,8 @@ def home():
         csfile = request.cookies.get('sessionfile')
 
         file = handle_file_import.CSTimerDataHandler(csfile) #how feed csfile -> ur handle file?
+
+        # file.session_names contains names of the files. make user choose a session, and then put that into session input.
 
         session_input = "1"
         if session_input.isdigit():
