@@ -60,8 +60,10 @@ class CSTimerDataHandler:
 
         else:
             names = []
-            for i in dictionary:
-                names.append(i["name"])
+            print(dictionary)
+            for i in range(len(dictionary)):
+                session_info = dictionary[str(i + 1)]
+                names.append(session_info["name"])
             return names
 
 # -------------------------------------------------------------------------
