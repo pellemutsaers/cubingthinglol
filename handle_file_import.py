@@ -4,31 +4,16 @@ from typing import Tuple, Union
 
 class CSTimerDataHandler:
     def __init__(self, csfile):
-        self.lines = None
         self.filename = f"static/{csfile}"
-        with open(self.filename) as txtfile:
+        with open(self.filename, encoding = "utf8") as txtfile:
             self.lines = str(txtfile.readlines())
             self.session_names = self.get_session_name(self.lines)
-
-    def get_filename(self):
-        for index, i in enumerate(os.listdir("./cstimerdata")):
-            print(f"{index + 1}: {i}")
-
-        cstimer_file = 1 #int(input("Enter index of the file you want to use: "))
-
-        if os.name == "posix":
-            filenames = os.listdir("./cstimerdata")
-            self.filename = f"./cstimerdata/{filenames[cstimer_file - 1]}"
-        else:
-            filenames = os.listdir(".\cstimerdata")
-            self.filename = f".\cstimerdata\{filenames[cstimer_file - 1]}"
-        return self.filename
 
     def get_sessions(self, session_number):
         sessions = self.lines.split("properties")[0].split('":')
         session = sessions[session_number]
         session = session.split("]],")[0] + "]]"
-        session_handled = string_list_conversion(session)
+        session_handled = parse_cstimer_data(session)
         session_name = self.get_session_name(self.lines, session_number)
         return self.get_times(session_handled), session_name
 
@@ -49,9 +34,10 @@ class CSTimerDataHandler:
 
     def get_session_name(self, lines, session_number=0):
         start = lines.index('":"')
-        end = lines.rindex('","color"')
-        containing_names = lines[start + 3:end]
-        dictionary = string_list_conversion(containing_names)
+        end = lines.index("]}}")
+        containing_names = lines[start + 3:end+3]
+        print(containing_names)
+        dictionary = parse_cstimer_data(containing_names)
 
         if session_number:
             session_info = dictionary[str(session_number)]
@@ -60,7 +46,6 @@ class CSTimerDataHandler:
 
         else:
             names = []
-            print(dictionary)
             for i in range(len(dictionary)):
                 session_info = dictionary[str(i + 1)]
                 names.append(session_info["name"])
@@ -68,8 +53,8 @@ class CSTimerDataHandler:
 
 # -------------------------------------------------------------------------
 
-def parse_dict_element(string: str) -> Tuple[object, object]:
-    new_string = string.replace(chr(92), "").replace('"', '')
+def parse_dict_element(string: str) -> tuple[object, object]:
+    new_string = string.replace(chr(92), "")
     return new_string[:new_string.index(":")], new_string[new_string.index(":")+ 1:]
 
 def unnested_split_dict(string: str) -> dict:
@@ -78,6 +63,7 @@ def unnested_split_dict(string: str) -> dict:
     returns = {}
     netto_sq_bracket = 0
     netto_bracket = 0
+    netto_quote = False
     for i, v in enumerate(string):
         end = i
         if v == "{":
@@ -88,7 +74,9 @@ def unnested_split_dict(string: str) -> dict:
             netto_sq_bracket += 1
         elif v == "]":
             netto_sq_bracket -= 1
-        elif (not netto_bracket) and (not netto_sq_bracket) and v == ",":
+        elif v == '"':
+            netto_quote = not netto_quote
+        elif (not netto_bracket) and (not netto_sq_bracket) and (not netto_quote) and (v == ","):
             key, value = parse_dict_element(string[start:end])
             returns[key] = value
             start = end + 1
@@ -102,24 +90,48 @@ def unnested_split_list(string: str) -> list:
     end = None
     returns = []
     netto_bracket = 0
+    netto_quote = False
+    # print("list parse:", string)
     for i, v in enumerate(string):
         end = i
         if v == "[":
             netto_bracket += 1
         elif v == "]":
             netto_bracket -= 1
-        elif (not netto_bracket) and v == ",":
+        elif v == '"':
+            netto_quote = not netto_quote
+        elif (not netto_bracket) and (not netto_quote) and (v == ","):
             returns.append(string[start:end])
             start = end + 1
     if string:
         returns.append(string[start:end+1])
     return returns
 
-def string_list_conversion(string: str) -> Union[list, dict]:
+def string_seq_conversion(string: str) -> list | dict:
     if "{" == string[0]:
-        return {k : string_list_conversion(v) for k, v in unnested_split_dict(string[1:-1]).items()}
+        return {k : string_seq_conversion(v) for k, v in unnested_split_dict(string[1:-1]).items()}
     if "[" in string:
-        return [string_list_conversion(i) for i in unnested_split_list(string[1:-1])]
+        return [string_seq_conversion(i) for i in unnested_split_list(string[1:-1])]
     return string
+
+def remove_double_quotes(py_object: list | dict | str):
+    if isinstance(py_object, str):
+        return py_object.replace('"', '')
+    elif isinstance(py_object, list):
+        for i, v in enumerate(py_object):
+            py_object[i] = remove_double_quotes(v)
+        return py_object
+    elif isinstance(py_object, dict):
+        for key, value in list(py_object.items()):
+            py_object.pop(key)
+            py_object[remove_double_quotes(key)] = remove_double_quotes(value)
+        return py_object
+    else:
+        print("WARNING: unknown datatype found")
+        return py_object
+    
+def parse_cstimer_data(data_string):
+    parsed_string = string_seq_conversion(data_string)
+    return remove_double_quotes(parsed_string)
 
 # Credit to Gijs Peletier ^
